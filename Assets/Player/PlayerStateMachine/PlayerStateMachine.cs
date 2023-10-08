@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,6 +7,9 @@ public class PlayerStateMachine : MonoBehaviour
     CharacterController _controller;
     Animator _animator;
     PlayerInput _playerInput;
+    [SerializeField]
+    Transform _playerCamera;
+    Transform _playerTransform;
 
     // State variables
     PlayerBaseState _currentState;
@@ -30,9 +30,11 @@ public class PlayerStateMachine : MonoBehaviour
     public float AppliedMovementZ { get { return _appliedMovement.z; } set { _appliedMovement.z = value; } }
     public float InitialJumpVelocity { get { return _initialJumpVelocity; } set { _initialJumpVelocity = value; } }
     public float RunMultiplier { get { return _runMultiplier; } }
+    public float WalkSpeed { get { return _walkSpeed; } set { _walkSpeed = value; } }
     public float GroundedGravity { get { return _groundedGravity; } }
     public float Gravity { get { return _gravity; } set { _gravity = value; } }
     public Vector2 CurrentMovementInput { get { return _currentMovementInput; } }
+    public Transform PlayerTransform { get { return _playerTransform; } }
 
     // Player Input Variables
     Vector2 _currentMovementInput;
@@ -41,8 +43,19 @@ public class PlayerStateMachine : MonoBehaviour
     bool _isMovementPressed;
     bool _isRunPressed;
 
+    // Camera Input Variables
+    Vector2 _currentCameraInput;
+    float _cameraPitch = 0.0f;
+
     // Constants
+    [Header("Movement Variables")]
+    [SerializeField]
     float _runMultiplier;
+    [SerializeField]
+    float _walkSpeed;
+    [Header("Camera Variables")]
+    [SerializeField]
+    float _sensitivity;
     int _zero = 0;
 
     // Gravity variables
@@ -64,6 +77,7 @@ public class PlayerStateMachine : MonoBehaviour
         // Set reference variables
         _playerInput = new PlayerInput();
         _controller = GetComponent<CharacterController>();
+        _playerTransform = gameObject.transform;
 
         // Setup State
         _states = new PlayerStateFactory(this);
@@ -74,6 +88,9 @@ public class PlayerStateMachine : MonoBehaviour
         _playerInput.CharacterControls.Movement.started += OnMovementInput;
         _playerInput.CharacterControls.Movement.canceled += OnMovementInput;
         _playerInput.CharacterControls.Movement.performed += OnMovementInput;
+        _playerInput.CharacterControls.Camera.started += OnCameraInput;
+        _playerInput.CharacterControls.Camera.canceled += OnCameraInput;
+        _playerInput.CharacterControls.Camera.performed += OnCameraInput;
         _playerInput.CharacterControls.Sprint.started += OnRun;
         _playerInput.CharacterControls.Sprint.canceled += OnRun;
         _playerInput.CharacterControls.Jump.started += OnJump;
@@ -92,21 +109,44 @@ public class PlayerStateMachine : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
     void Update()
     {
+        HandleCameraMovement();
         _currentState.UpdateStates();
-        Debug.Log(_appliedMovement);
         _controller.Move(_appliedMovement * Time.deltaTime);
+        Debug.Log(transform.forward);
+    }
+
+    public Vector3 CalculateDirectionalMovment(float speed)
+    {
+        Vector3 _xMovement = transform.forward * _currentMovementInput.y;
+        Vector3 _zMovement = transform.right * _currentMovementInput.x;
+
+        Vector3 _combinedMovement = _xMovement + _zMovement;
+
+        return _combinedMovement *= speed;
+    }
+
+    void HandleCameraMovement()
+    {
+        _cameraPitch -= _currentCameraInput.y * _sensitivity;
+        _cameraPitch = Mathf.Clamp(_cameraPitch, -90.0f, 90.0f);
+        _playerCamera.localEulerAngles = Vector3.right * _cameraPitch;
+        transform.Rotate(Vector3.up * _currentCameraInput.x * _sensitivity);
     }
 
     void OnMovementInput(InputAction.CallbackContext context)
     {
         _currentMovementInput = context.ReadValue<Vector2>();
         _isMovementPressed = _currentMovementInput.x != _zero || _currentMovementInput.y != _zero;
+    }
+
+    void OnCameraInput(InputAction.CallbackContext context)
+    {
+        _currentCameraInput = context.ReadValue<Vector2>();
     }
 
     void OnJump(InputAction.CallbackContext context)

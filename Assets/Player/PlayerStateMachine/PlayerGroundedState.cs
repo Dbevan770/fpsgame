@@ -45,19 +45,16 @@ public class PlayerGroundedState : PlayerBaseState, IRootState
         }
     }
 
-    public override bool CheckSwitchStates() 
+    public override void CheckSwitchStates() 
     {
         // if player is grounded and jump is pressed, switch to jump state
         if (Ctx.IsJumpPressed && !Ctx.RequireNewJumpPress)
         {
             SwitchState(Factory.Jump());
-            return true;
         }
         else if (!Ctx.Controller.isGrounded)
         {
             SwitchState(Factory.Fall());
-            return true;
         }
-        return false;
     }
 }

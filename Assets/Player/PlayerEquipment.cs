@@ -94,4 +94,44 @@ public class PlayerEquipment : MonoBehaviour
     {
         Helmet = null;
     }
+
+    public void EquipBody(Body body)
+    {
+        Body = body;
+    }
+
+    public void UnequipBody()
+    {
+        Body = null;
+    }
+
+    public void EquipArms(Arms arms)
+    {
+        Arms = arms;
+    }
+
+    public void UnequipArms()
+    {
+        Arms = null;
+    }
+
+    public void EquipLegs(Legs legs)
+    {
+        Legs = legs;
+    }
+
+    public void UnequipLegs()
+    {
+        Legs = null;
+    }
+
+    public void EquipBack(Back back)
+    {
+        Back = back;
+    }
+
+    public void UnequipBack()
+    {
+        Back = null;
+    }
 }

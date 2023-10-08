@@ -17,10 +17,8 @@ public class PlayerJumpState : PlayerBaseState, IRootState
 
     public override void UpdateState() 
     {
-        if (!CheckSwitchStates())
-        {
-            HandleGravity();
-        }
+        HandleGravity();
+        CheckSwitchStates();
     }
 
     public override void ExitState() 
@@ -48,14 +46,12 @@ public class PlayerJumpState : PlayerBaseState, IRootState
         }
     }
 
-    public override bool CheckSwitchStates() 
+    public override void CheckSwitchStates() 
     {
         if (Ctx.Controller.isGrounded)
         {
             SwitchState(Factory.Grounded());
-            return true;
         }
-        return false;
     }
 
     void HandleJump()

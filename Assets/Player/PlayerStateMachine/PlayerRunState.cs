@@ -13,29 +13,27 @@ public class PlayerRunState : PlayerBaseState
 
     public override void UpdateState()
     {
-        if(!CheckSwitchStates())
-        {
-            Ctx.AppliedMovementX = Ctx.CurrentMovementInput.x * Ctx.RunMultiplier;
-            Ctx.AppliedMovementZ = Ctx.CurrentMovementInput.y * Ctx.RunMultiplier;
-        }
+        Vector3 _calculatedMovement = Ctx.CalculateDirectionalMovment(Ctx.WalkSpeed * Ctx.RunMultiplier);
+
+        Ctx.AppliedMovementX = _calculatedMovement.x;
+        Ctx.AppliedMovementZ = _calculatedMovement.z;
+
+        CheckSwitchStates();
     }
 
     public override void ExitState() { }
 
     public override void InitializeSubState() { }
 
-    public override bool CheckSwitchStates()
+    public override void CheckSwitchStates()
     {
         if (Ctx.IsMovementPressed && !Ctx.IsRunPressed)
         {
             SwitchState(Factory.Walk());
-            return true;
         }
         else if (!Ctx.IsMovementPressed && !Ctx.IsRunPressed)
         {
             SwitchState(Factory.Idle());
-            return true;
         }
-        return false;
     }
 }
